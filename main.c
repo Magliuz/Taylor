@@ -78,6 +78,7 @@ void drawUI() {
     static bool expressionEdit = false;
     static char expression[128] = "sin(x)";
     static int err;
+    static bool expressionError = false;
 
     Rectangle expressionTextBox = {
         settingsArea.x +UI_MARGIN,
@@ -96,18 +97,21 @@ void drawUI() {
         settingsArea.width - 6*UI_MARGIN,
         50
     };
-    static bool drawRis=false;
     if (GuiButton(okButton, "OK")) {
-        function = te_compile(expression, vars, 1, &err);
-        if (!function) {
-            drawRis=false;
-            printf("Error compilazione %d\n", err);
+        te_expr *temporaryFunction = te_compile(expression, vars, 1, &err);
+        if (temporaryFunction) {
+            function = temporaryFunction;
+            expressionError = false;
         }else {
-            drawRis=true;
+            expressionError = true;
         }
     }
-    if (drawRis) {
-        x=3;
-        DrawText(TextFormat("%f", te_eval(function)), 0,0,30,BLACK);
+
+    if (expressionError) {
+        Color errorTextColor = ThemeColor(DEFAULT, TEXT_COLOR_FOCUSED);
+        Vector2 errorTextPosition = {expressionTextBox.x, expressionTextBox.y + okButton.height + 5};
+        const char *errorTextText = TextFormat("Errore in posizione: %d", err);
+        DrawText(errorTextText, errorTextPosition.x, errorTextPosition.y, 20, errorTextColor);
     }
+
 }

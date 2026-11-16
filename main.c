@@ -25,7 +25,9 @@ Rectangle settingsArea;
 Rectangle functionGraphArea;
 Rectangle errorGraphArea;
 
-
+double x;
+te_variable vars[] = {{"x", &x}};
+te_expr *function;
 
 int main(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Polinomi di Taylor");
@@ -75,6 +77,7 @@ Color ThemeColor(int control,int property) {
 void drawUI() {
     static bool expressionEdit = false;
     static char expression[128] = "sin(x)";
+    static int err;
 
     Rectangle expressionTextBox = {
         settingsArea.x +UI_MARGIN,
@@ -93,8 +96,18 @@ void drawUI() {
         settingsArea.width - 6*UI_MARGIN,
         50
     };
-
+    static bool drawRis=false;
     if (GuiButton(okButton, "OK")) {
-
+        function = te_compile(expression, vars, 1, &err);
+        if (!function) {
+            drawRis=false;
+            printf("Error compilazione %d\n", err);
+        }else {
+            drawRis=true;
+        }
+    }
+    if (drawRis) {
+        x=3;
+        DrawText(TextFormat("%f", te_eval(function)), 0,0,30,BLACK);
     }
 }

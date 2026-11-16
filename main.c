@@ -66,7 +66,7 @@ int main(void) {
         GuiGroupBox(errorGraphArea, "Errore");
         drawUI();
 
-        drawGraph(findRectangleCenter(functionGraphArea), (Vector2){0,0}, 0.1, functionGraphArea.width, functionGraphArea.height);
+        drawGraph(findRectangleCenter(functionGraphArea), (Vector2){0,0}, 0.05, functionGraphArea.width, functionGraphArea.height);
 
         EndDrawing();
     }
@@ -128,16 +128,17 @@ void drawGraph(Vector2 center, Vector2 offset, double scale, int width, int heig
     int leftGraphBorder = center.x - width/2;
     int rightGraphBorder = center.x + width/2;
 
-    int y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
     x = determineValueOfX(scale, leftGraphBorder, center.x, offset.x);
+    int y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
     Vector2 previousPoint = {leftGraphBorder, y};
-    Vector2 nextPoint;
+    Vector2 nextPoint = {0,0};
 
     for (int i= leftGraphBorder + 1; i <= rightGraphBorder; i++) {
-        y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
         x = determineValueOfX(scale, i, center.x, offset.x);
+        y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
+
         nextPoint = (Vector2){i, y};
-        DrawLineEx(previousPoint, nextPoint, 2, ThemeColor(DEFAULT, LINE_COLOR));
+        DrawLineEx(previousPoint, nextPoint, 4, ThemeColor(DEFAULT, LINE_COLOR));
         previousPoint = nextPoint;
     }
 }
@@ -147,5 +148,5 @@ double determineValueOfX(double scale, int position_x, int center_x, int offset_
 }
 
 double determineValueOfY(double scale, double y, int center_y, int offset_y) {
-    return (center_y - y - offset_y)/scale;
+    return (center_y - y/scale - offset_y);
 }

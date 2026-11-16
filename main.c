@@ -20,10 +20,13 @@
 
 Color ThemeColor(int control,int property);
 void drawUI();
+Vector2 findRectangleCenter(Rectangle rectangle);
+double determineValueOfX(double scale,  int position_x, int center_x, int offset_x);
+double determineValueOfY(double scale, double y, int center_y, int offset_y);
+void drawGraph(Vector2 center, Vector2 offset, double scale, int width, int height);
 
-Rectangle settingsArea;
-Rectangle functionGraphArea;
-Rectangle errorGraphArea;
+Rectangle settingsArea, functionGraphArea, errorGraphArea;
+Vector2 functionGraphCenter, errorGraphCenter;
 
 double x;
 te_variable vars[] = {{"x", &x}};
@@ -63,6 +66,7 @@ int main(void) {
         GuiGroupBox(errorGraphArea, "Errore");
         drawUI();
 
+        drawGraph(findRectangleCenter(functionGraphArea), (Vector2){0,0}, 0.1, functionGraphArea.width, functionGraphArea.height);
 
         EndDrawing();
     }
@@ -114,4 +118,34 @@ void drawUI() {
         DrawText(errorTextText, errorTextPosition.x, errorTextPosition.y, 20, errorTextColor);
     }
 
+}
+
+Vector2 findRectangleCenter(Rectangle rectangle) {
+    return (Vector2){rectangle.x + rectangle.width/2, rectangle.y + rectangle.height/2};
+}
+
+void drawGraph(Vector2 center, Vector2 offset, double scale, int width, int height) {
+    int leftGraphBorder = center.x - width/2;
+    int rightGraphBorder = center.x + width/2;
+
+    int y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
+    x = determineValueOfX(scale, leftGraphBorder, center.x, offset.x);
+    Vector2 previousPoint = {leftGraphBorder, y};
+    Vector2 nextPoint;
+
+    for (int i= leftGraphBorder + 1; i <= rightGraphBorder; i++) {
+        y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
+        x = determineValueOfX(scale, i, center.x, offset.x);
+        nextPoint = (Vector2){i, y};
+        DrawLineEx(previousPoint, nextPoint, 2, ThemeColor(DEFAULT, LINE_COLOR));
+        previousPoint = nextPoint;
+    }
+}
+
+double determineValueOfX(double scale, int position_x, int center_x, int offset_x) {
+    return (position_x - center_x + offset_x)*scale;
+}
+
+double determineValueOfY(double scale, double y, int center_y, int offset_y) {
+    return (center_y - y - offset_y)/scale;
 }

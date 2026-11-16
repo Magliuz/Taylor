@@ -3,4 +3,10 @@ project(Taylor C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Taylor main.c)
+set(RAYLIB_DIR "C:/raylib/raylib/src")
+
+add_executable(Taylor main.c tinyexpr.c)
+
+target_include_directories(Taylor PRIVATE ${RAYLIB_DIR})
+target_link_directories(Taylor PRIVATE ${RAYLIB_DIR})
+target_link_libraries(Taylor PRIVATE raylib opengl32 gdi32 winmm)

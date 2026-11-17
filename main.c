@@ -28,7 +28,7 @@ void inputs();
 
 Rectangle settingsArea, functionGraphArea, errorGraphArea;
 Vector2 functionGraphCenter, errorGraphCenter, offset, offsetCenter = {0,0};
-double scale;
+double scale = 0.02;
 
 double x;
 te_variable vars[] = {{"x", &x}};
@@ -74,7 +74,7 @@ int main(void) {
         GuiGroupBox(errorGraphArea, "Errore");
 
         inputs();
-        drawGraph(findRectangleCenter(functionGraphArea), offset, 0.05, functionGraphArea.width, functionGraphArea.height);
+        drawGraph(findRectangleCenter(functionGraphArea), offset, scale, functionGraphArea.width, functionGraphArea.height);
         drawUI();
 
         EndDrawing();
@@ -170,10 +170,22 @@ void inputs() {
     static Vector2 mouseClickPosition = {0,0};
     Vector2 newOffset = {0,0};
     static bool isMoving = false;
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), functionGraphArea)) {
-        mouseClickPosition = GetMousePosition();
-        isMoving = true;
+    if (CheckCollisionPointRec(GetMousePosition(), functionGraphArea)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            mouseClickPosition = GetMousePosition();
+            isMoving = true;
+        }
+        if (GetMouseWheelMove() != 0 && (scale >= 0.001 && scale <= 0.5)) {
+            double newScale = scale + GetMouseWheelMove()*0.01;
+            if (newScale < 0.001) {
+                newScale = 0.001;
+            }else if (scale > 0.5) {
+                newScale = 0.5;
+            }
+            scale = newScale;
+        }
     }
+
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && isMoving) {
         newOffset = Vector2Subtract(mouseClickPosition, GetMousePosition());
         offset = Vector2Add(offsetCenter, newOffset);
@@ -182,7 +194,6 @@ void inputs() {
         offsetCenter = offset;
         isMoving = false;
     }
-
 
 
 

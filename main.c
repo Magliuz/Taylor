@@ -24,9 +24,11 @@ Vector2 findRectangleCenter(Rectangle rectangle);
 double determineValueOfX(double scale,  int position_x, int center_x, int offset_x);
 double determineValueOfY(double scale, double y, int center_y, int offset_y);
 void drawGraph(Vector2 center, Vector2 offset, double scale, int width, int height);
+void inputs();
 
 Rectangle settingsArea, functionGraphArea, errorGraphArea;
-Vector2 functionGraphCenter, errorGraphCenter;
+Vector2 functionGraphCenter, errorGraphCenter, offset, offsetCenter = {0,0};
+double scale;
 
 double x;
 te_variable vars[] = {{"x", &x}};
@@ -62,6 +64,7 @@ int main(void) {
         ERROR_H
     };
 
+
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(ThemeColor(DEFAULT, BACKGROUND_COLOR));
@@ -69,9 +72,10 @@ int main(void) {
         GuiGroupBox(settingsArea, "Impostazioni");
         GuiGroupBox(functionGraphArea, "Funzione");
         GuiGroupBox(errorGraphArea, "Errore");
-        drawUI();
 
-        drawGraph(findRectangleCenter(functionGraphArea), (Vector2){0,0}, 0.05, functionGraphArea.width, functionGraphArea.height);
+        inputs();
+        drawGraph(findRectangleCenter(functionGraphArea), offset, 0.05, functionGraphArea.width, functionGraphArea.height);
+        drawUI();
 
         EndDrawing();
     }
@@ -160,4 +164,26 @@ double determineValueOfX(double scale, int position_x, int center_x, int offset_
 
 double determineValueOfY(double scale, double y, int center_y, int offset_y) {
     return (center_y - y/scale - offset_y);
+}
+
+void inputs() {
+    static Vector2 mouseClickPosition = {0,0};
+    Vector2 newOffset = {0,0};
+    static bool isMoving = false;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), functionGraphArea)) {
+        mouseClickPosition = GetMousePosition();
+        isMoving = true;
+    }
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && isMoving) {
+        newOffset = Vector2Subtract(mouseClickPosition, GetMousePosition());
+        offset = Vector2Add(offsetCenter, newOffset);
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && isMoving) {
+        offsetCenter = offset;
+        isMoving = false;
+    }
+
+
+
+
 }

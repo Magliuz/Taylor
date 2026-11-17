@@ -31,13 +31,18 @@ Vector2 functionGraphCenter, errorGraphCenter;
 double x;
 te_variable vars[] = {{"x", &x}};
 te_expr *function;
+const char *defaultExpression = "sin(x)";
 
 int main(void) {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Polinomi di Taylor");
     SetTargetFPS(60);
 
     GuiLoadStyleBluish();
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+
+    int error;
+    function = te_compile(defaultExpression, vars, 1, &error);
 
     settingsArea = (Rectangle){
         MARGIN, MARGIN,
@@ -104,6 +109,7 @@ void drawUI() {
     if (GuiButton(okButton, "OK")) {
         te_expr *temporaryFunction = te_compile(expression, vars, 1, &err);
         if (temporaryFunction) {
+            te_free(function);
             function = temporaryFunction;
             expressionError = false;
         }else {
@@ -125,22 +131,27 @@ Vector2 findRectangleCenter(Rectangle rectangle) {
 }
 
 void drawGraph(Vector2 center, Vector2 offset, double scale, int width, int height) {
+    if (!function) {
+        return;
+    }
     int leftGraphBorder = center.x - width/2;
     int rightGraphBorder = center.x + width/2;
 
     x = determineValueOfX(scale, leftGraphBorder, center.x, offset.x);
-    int y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
+    double y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
     Vector2 previousPoint = {leftGraphBorder, y};
     Vector2 nextPoint = {0,0};
 
-    for (int i= leftGraphBorder + 1; i <= rightGraphBorder; i++) {
+    BeginScissorMode(functionGraphArea.x, functionGraphArea.y, functionGraphArea.width, functionGraphArea.height);
+    for (double i= leftGraphBorder + 1; i <= rightGraphBorder; i++) {
         x = determineValueOfX(scale, i, center.x, offset.x);
         y = determineValueOfY(scale, te_eval(function), center.y, offset.y);
 
         nextPoint = (Vector2){i, y};
-        DrawLineEx(previousPoint, nextPoint, 4, ThemeColor(DEFAULT, LINE_COLOR));
+        DrawLineEx(previousPoint, nextPoint, 2, ThemeColor(DEFAULT, LINE_COLOR));
         previousPoint = nextPoint;
     }
+    EndScissorMode();
 }
 
 double determineValueOfX(double scale, int position_x, int center_x, int offset_x) {

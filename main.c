@@ -176,7 +176,7 @@ void inputs() {
             isMoving = true;
         }
         if (GetMouseWheelMove() != 0 && (scale >= 0.001 && scale <= 0.5)) {
-            double newScale = scale + GetMouseWheelMove()*0.01;
+            double newScale = scale - GetMouseWheelMove()*0.01;
             if (newScale < 0.001) {
                 newScale = 0.001;
             }else if (scale > 0.5) {
